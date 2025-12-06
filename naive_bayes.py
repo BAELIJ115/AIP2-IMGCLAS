@@ -38,10 +38,10 @@ class NaiveBayesClassifier:
             [0] * self.num_features
             for _ in range(self.num_classes)
         ]
+
         # counting occurences
         for feats, label in zip(X, y):
             class_counts[label] += 1
-
             for i, value in enumerate(feats):
                 if value > 0:  # treat positive number as "on"
                     feature_counts[label][i] += 1
@@ -52,8 +52,7 @@ class NaiveBayesClassifier:
             for c in range(self.num_classes)
         ]
 
-        # conditional probabilities:
-        # p(feature_i = 1 | class = c)
+        # conditional probabilities: p(feature_i = 1 | class = c)
         self.feature_probs = [
             [0] * self.num_features
             for _ in range(self.num_classes)
@@ -63,10 +62,11 @@ class NaiveBayesClassifier:
             for i in range(self.num_features):
                 count_on = feature_counts[c][i]
                 total = class_counts[c]
+
+                # Laplace smoothing
                 prob = (count_on + 1) / (total + 2)
                 self.feature_probs[c][i] = prob
 
- 
     # predict one sample
     def predict_one(self, feats: List[int]) -> int:
         best_class = None

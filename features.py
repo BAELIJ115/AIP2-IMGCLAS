@@ -1,7 +1,3 @@
-# the goal of this file is to  make functions that will take a sample from data loader and convert it into a list of numbers
-# representing the features of the sample. These features will be used for training a machine learning model.
-# we will implemnt 3 feature types (pixels,counting,and then both combined)
-
 # features.py
 
 from typing import List
@@ -22,7 +18,7 @@ def extract_features(samples: List[Sample], feature_type: str) -> List[List[int]
         elif feature_type == "counting":
             feats = counting_features(s)
 
-        elif feature_type == "pixels + counting":
+        elif feature_type == "pixels+counting":
             feats = pixel_features(s) + counting_features(s)
 
         else:
@@ -33,33 +29,24 @@ def extract_features(samples: List[Sample], feature_type: str) -> List[List[int]
     return X
 
 
-
-#Raw Pixel Features(binary)
-
 def pixel_features(sample: Sample) -> List[int]:
     """
-    Converts ASCII pixels to binary vector.
-    '#' or '+' to 1
-    ' ' to 0
+    Converts ASCII pixels to a binary vector.
+      - '#' or '+' → 1
+      - ' '         → 0
     """
     vec = []
     for row in sample.pixels:
         for ch in row:
-            if ch == " ":
-                vec.append(0)
-            else:
-                vec.append(1)
+            vec.append(0 if ch == " " else 1)
     return vec
 
 
-
-# Counting Features
-
 def counting_features(sample: Sample) -> List[int]:
     """
-    Count:
-       - # of filled pixels (# or +)
-       - # of empty pixels (spaces)
+    Counts:
+       - filled pixels (# or +)
+       - empty pixels (spaces)
     """
     filled = 0
     empty = 0

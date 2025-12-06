@@ -35,7 +35,6 @@ def build_default_paths(data_dir: str, dataset: str):
         test_img = "facedatatest"
         test_lbl = "facedatatestlabels"
 
-
     else:
         raise ValueError("Dataset must be 'digits' or 'faces'.")
 
@@ -52,118 +51,89 @@ def build_default_paths(data_dir: str, dataset: str):
 
 
 def main():
-    # Parse command-line arguments
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
         "--dataset",
         type=str,
         choices=["digits", "faces"],
-        required=True,
-        help="Which dataset to use."
+        required=True
     )
 
     parser.add_argument(
         "--algorithm",
         type=str,
         choices=["naive_bayes", "perceptron"],
-        required=True,
-        help="Which learning algorithm to use."
+        required=True
     )
 
     parser.add_argument(
         "--feature-type",
         type=str,
         default="pixels",
-        choices=["pixels", "counting", "pixels+counting"],
-        help="Feature extraction type."
+        choices=["pixels", "counting"]
     )
 
     parser.add_argument(
         "--data-dir",
         type=str,
-        default=".",
-        help="Root directory containing digitdata/ and facedata/."
+        default="."
     )
 
     parser.add_argument(
         "--runs",
         type=int,
-        default=5,
-        help="How many repeated random subsampling runs per percentage."
+        default=5
     )
 
     parser.add_argument(
         "--seed",
         type=int,
-        default=42,
-        help="Random seed for reproducibility."
+        default=42
     )
 
     args = parser.parse_args()
-
     random.seed(args.seed)
 
-
-    print("   CS4346 Project 2 - Image Classifier ")
-
-    print(f"Dataset: {args.dataset}")
-    print(f"Algorithm: {args.algorithm}")
-    print(f"Feature type: {args.feature_type}")
-    print(f"Data dir: {args.data_dir}")
-    print()
+    print("\n=== CS4346 Project 2 - Image Classifier ===\n")
+    print(f"Dataset:     {args.dataset}")
+    print(f"Algorithm:   {args.algorithm}")
+    print(f"Features:    {args.feature_type}\n")
 
     # Load dataset
     paths = build_default_paths(args.data_dir, args.dataset)
 
-    train_samples, h_tr, w_tr = load_ascii_dataset(
-        paths["train_images"],
-        paths["train_labels"]
-    )
+    train_samples, h_tr, w_tr = load_ascii_dataset(paths["train_images"], paths["train_labels"])
+    _, h_val, w_val = load_ascii_dataset(paths["val_images"], paths["val_labels"])
+    test_samples, h_tst, w_tst = load_ascii_dataset(paths["test_images"], paths["test_labels"])
 
-    val_samples, h_val, w_val = load_ascii_dataset(
-        paths["val_images"],
-        paths["val_labels"]
-    )
-
-    test_samples, h_tst, w_tst = load_ascii_dataset(
-        paths["test_images"],
-        paths["test_labels"]
-    )
-
-    # making sure all image sizes match
+    # Ensure consistent image size
     assert (h_tr, w_tr) == (h_val, w_val) == (h_tst, w_tst), "Image sizes mismatch!"
 
-    print(f"Train size: {len(train_samples)}")
-    print(f"Val size: {len(val_samples)}")
-    print(f"Test size: {len(test_samples)}")
-    print(f"Image size: {h_tr} x {w_tr}\n")
+    print(f"Train size:  {len(train_samples)}")
+    print(f"Test size:   {len(test_samples)}\n")
 
-    # Extracting features
+    # Extract features
     X_train = extract_features(train_samples, args.feature_type)
     y_train = [s.label for s in train_samples]
-
-    X_val = extract_features(val_samples, args.feature_type)
-    y_val = [s.label for s in val_samples]
 
     X_test = extract_features(test_samples, args.feature_type)
     y_test = [s.label for s in test_samples]
 
-    # Choose classifier
+    # Select classifier
     if args.algorithm == "naive_bayes":
         def factory():
             return NaiveBayesClassifier()
-    else:  # perceptron
+    else:
         def factory():
             return PerceptronClassifier(num_epochs=5, learning_rate=1.0)
 
     # Training percentages
-    train_percentages = [0.1 * i for i in range(1, 11)]  # 0.1 → 1.0
+    train_percentages = [0.1 * i for i in range(1, 11)]
 
-
-    # Run experiments
     print("Running experiments...\n")
 
+    # Run experiments
     results = run_subsample_experiments(
         X_train=X_train,
         y_train=y_train,
@@ -174,11 +144,9 @@ def main():
         num_runs=args.runs
     )
 
-
-    # show results
-    print("\nResults (on TEST set):")
-    print("Train%   MeanAcc   StdAcc    MeanTrainTime(s)")
-
+    # Print results
+    print("Results (TEST data):")
+    print("Train%   MeanAcc   StdAcc    TrainTime(s)")
     for p in sorted(results.keys()):
         mean_acc, std_acc, mean_time = results[p]
         print(f"{int(p*100):>3d}%    {mean_acc:7.4f}   {std_acc:7.4f}   {mean_time:10.4f}")

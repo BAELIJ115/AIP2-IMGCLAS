@@ -1,88 +1,94 @@
-#the goal of this is to implement perceptron algorithm for classifying images of digits and faces
-# perceptron.py
+# naive_bayes.py
+# implements naive bayes classifier 
 
+import math
 from typing import List
-import random
 
 
-class PerceptronClassifier:
-    """
-    Multi-class perceptron.
-    Works for:
-      - digits(10 classes) and faces(2 classes)
-    """
+class NaiveBayesClassifier:
 
-    def __init__(self, num_epochs: int = 5, learning_rate: float = 1.0):
-        self.num_epochs = num_epochs
-        self.lr = learning_rate
-
+    def __init__(self):
         self.num_classes = None
         self.num_features = None
 
-        # weights[class][feature_index]
-        self.weights = None
+        # p(class)
+        self.class_priors = []
 
-    # TRAINING
+        # p(feature_i = 1 | class = c)
+        # Shape: [num_classes][num_features]
+        self.feature_probs = []
+
+    # training
     def fit(self, X: List[List[int]], y: List[int]):
         """
-        X = list of feature vectors
-        y = list of labels
-        """
+        Fit the Naive Bayes classifier.
 
+        X : list of feature vectors (each a list of ints: 0/1 or small int)
+        y : list of class labels (e.g., 0–9 for digits, 0/1 for faces)
+        """
         n_samples = len(X)
         self.num_features = len(X[0])
         self.num_classes = len(set(y))
 
-        # all wights zero initially
-        self.weights = [
-            [0.0] * self.num_features
+        # examples per class
+        class_counts = [0] * self.num_classes
+
+        # keep track of feature counts per class
+        feature_counts = [
+            [0] * self.num_features
             for _ in range(self.num_classes)
         ]
 
-        # training loop
-        for epoch in range(self.num_epochs):
-            # shuffles order each epoch
-            indices = list(range(n_samples))
-            random.shuffle(indices)
+        # counting occurences
+        for feats, label in zip(X, y):
+            class_counts[label] += 1
+            for i, value in enumerate(feats):
+                if value > 0:  # treat positive number as "on"
+                    feature_counts[label][i] += 1
 
-            for idx in indices:
-                feats = X[idx]
-                true_label = y[idx]
+        # compute priors: p(class = c)
+        self.class_priors = [
+            class_counts[c] / n_samples
+            for c in range(self.num_classes)
+        ]
 
-                # uses current weights to predict
-                predicted = self.predict_one(feats)
-
-                # if rule is wrong then it updates weights
-                if predicted != true_label:
-                    for i in range(self.num_features):
-                        # reward true class
-                        self.weights[true_label][i] += self.lr * feats[i]
-                        # punish wrong class
-                        self.weights[predicted][i] -= self.lr * feats[i]
-
-    # prediicts one sample
-    def predict_one(self, feats: List[int]) -> int:
-        """
-        Compute dot product with each class's weight vector.
-        Return the class with highest score.
-        """
-        best_class = None
-        best_score = float("-inf")
+        # conditional probabilities: p(feature_i = 1 | class = c)
+        self.feature_probs = [
+            [0] * self.num_features
+            for _ in range(self.num_classes)
+        ]
 
         for c in range(self.num_classes):
-            score = 0.0
-            w = self.weights[c]
-
             for i in range(self.num_features):
-                score += w[i] * feats[i]
+                count_on = feature_counts[c][i]
+                total = class_counts[c]
 
+                # Laplace smoothing
+                prob = (count_on + 1) / (total + 2)
+                self.feature_probs[c][i] = prob
+
+    # predict one sample
+    def predict_one(self, feats: List[int]) -> int:
+        best_class = None
+        best_score = -math.inf
+
+        for c in range(self.num_classes):
+            score = math.log(self.class_priors[c])
+
+            for i, value in enumerate(feats):
+                p = self.feature_probs[c][i]
+
+                if value > 0:       # feature on
+                    score += math.log(p)
+                else:               # feature off
+                    score += math.log(1 - p)
+
+            # tracks best scoring class
             if score > best_score:
                 best_score = score
                 best_class = c
 
         return best_class
 
-
-    # predict many samples
     def predict(self, X: List[List[int]]) -> List[int]:
         return [self.predict_one(feats) for feats in X]

@@ -1,5 +1,7 @@
-# the goal of this file is to subsample training data, run several random trials, train the soecific classifier,meaure accuracy and runtme, and give avgerages of these metrics
 # evaluation.py
+# The goal of this file is to subsample training data, run several random trials,
+# train the classifier, measure accuracy and runtime, and return averaged metrics.
+
 import random
 import time
 from statistics import mean, stdev
@@ -8,7 +10,7 @@ from typing import List, Callable, Dict, Tuple
 
 def accuracy(preds: List[int], labels: List[int]) -> float:
     """
-    Computeing classification accuracy.
+    Computes classification accuracy.
     """
     correct = sum(p == y for p, y in zip(preds, labels))
     return correct / len(labels)
@@ -24,19 +26,22 @@ def run_subsample_experiments(
     num_runs: int = 5
 ) -> Dict[float, Tuple[float, float, float]]:
     """
-    each training percentage:
-        - randomly samples training data
-        - trains classifier
-        - tests accuracy
-        - measures training time
-        - repeats num_runs times
+    For each training percentage:
+        - randomly sample a subset of the training data
+        - train the classifier
+        - evaluate accuracy on the test set
+        - measure training time
+        - repeat num_runs times
 
-    then return:
+    Returns:
         results[p] = (mean_accuracy, std_accuracy, mean_train_time)
     """
-    results = {}
 
-    n_train_total = len(X_train)
+    results = {}
+    n_train = len(X_train)
+
+    # Pre-generate index list for sampling
+    base_indices = list(range(n_train))
 
     for p in train_percentages:
         print(f"Running experiments for {int(p * 100)}% training data...")
@@ -44,33 +49,33 @@ def run_subsample_experiments(
         run_accuracies = []
         run_times = []
 
-        subset_size = max(1, int(p * n_train_total))
+        subset_size = max(1, int(p * n_train))
 
         for _ in range(num_runs):
-            # Random subset of training data
-            indices = list(range(n_train_total))
-            random.shuffle(indices)
-            chosen = indices[:subset_size]
+
+            # Random subset of training examples
+            random.shuffle(base_indices)
+            chosen = base_indices[:subset_size]
 
             X_sub = [X_train[i] for i in chosen]
             y_sub = [y_train[i] for i in chosen]
 
-            # Training the classifier
+            # Create classifier instance
             clf = classifier_factory()
 
+            # Train & time
             t0 = time.time()
             clf.fit(X_sub, y_sub)
             train_time = time.time() - t0
 
-            # Evaluateing on the test set
-
+            # Evaluate on the test set
             preds = clf.predict(X_test)
             acc = accuracy(preds, y_test)
 
             run_accuracies.append(acc)
             run_times.append(train_time)
 
-        # Computing statistics
+        # Compute statistics across runs
         mean_acc = mean(run_accuracies)
         std_acc = stdev(run_accuracies) if num_runs > 1 else 0.0
         mean_time = mean(run_times)
