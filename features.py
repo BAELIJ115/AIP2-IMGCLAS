@@ -22,7 +22,7 @@ def extract_features(samples: List[Sample], feature_type: str) -> List[List[int]
         elif feature_type == "counting":
             feats = counting_features(s)
 
-        elif feature_type == "pixels+counting":
+        elif feature_type == "pixels + counting":
             feats = pixel_features(s) + counting_features(s)
 
         else:
@@ -33,14 +33,14 @@ def extract_features(samples: List[Sample], feature_type: str) -> List[List[int]
     return X
 
 
-# -------------------------------------------------
-# 1) Raw Pixel Features (binary)
-# -------------------------------------------------
+
+#Raw Pixel Features(binary)
+
 def pixel_features(sample: Sample) -> List[int]:
     """
     Converts ASCII pixels to binary vector.
-    '#' or '+' → 1
-    ' '        → 0
+    '#' or '+' to 1
+    ' ' to 0
     """
     vec = []
     for row in sample.pixels:
@@ -52,15 +52,14 @@ def pixel_features(sample: Sample) -> List[int]:
     return vec
 
 
-# -------------------------------------------------
-# 2) Counting Features (VERY simple)
-# -------------------------------------------------
+
+# Counting Features
+
 def counting_features(sample: Sample) -> List[int]:
     """
     Count:
-       - number of filled pixels (# or +)
-       - number of empty pixels (spaces)
-    Returns a 2-dim vector [num_filled, num_empty]
+       - # of filled pixels (# or +)
+       - # of empty pixels (spaces)
     """
     filled = 0
     empty = 0

@@ -1,6 +1,5 @@
 #the goal of this is to implement perceptron algorithm for classifying images of digits and faces
 # perceptron.py
-# perceptron.py
 
 from typing import List
 import random
@@ -10,8 +9,7 @@ class PerceptronClassifier:
     """
     Multi-class perceptron.
     Works for:
-      - digits (10 classes)
-      - faces (2 classes)
+      - digits(10 classes) and faces(2 classes)
     """
 
     def __init__(self, num_epochs: int = 5, learning_rate: float = 1.0):
@@ -24,9 +22,7 @@ class PerceptronClassifier:
         # weights[class][feature_index]
         self.weights = None
 
-    # ----------------------------------------------------
     # TRAINING
-    # ----------------------------------------------------
     def fit(self, X: List[List[int]], y: List[int]):
         """
         X = list of feature vectors
@@ -37,16 +33,15 @@ class PerceptronClassifier:
         self.num_features = len(X[0])
         self.num_classes = len(set(y))
 
-        # Initialize all weights to zero
-        # shape: [num_classes][num_features]
+        # all wights zero initially
         self.weights = [
             [0.0] * self.num_features
             for _ in range(self.num_classes)
         ]
 
-        # Training loop
+        # training loop
         for epoch in range(self.num_epochs):
-            # shuffle the order each epoch
+            # shuffles order each epoch
             indices = list(range(n_samples))
             random.shuffle(indices)
 
@@ -54,10 +49,10 @@ class PerceptronClassifier:
                 feats = X[idx]
                 true_label = y[idx]
 
-                # Predict using current weights
+                # uses current weights to predict
                 predicted = self.predict_one(feats)
 
-                # Update rule only if wrong
+                # if rule is wrong then it updates weights
                 if predicted != true_label:
                     for i in range(self.num_features):
                         # reward true class
@@ -65,9 +60,7 @@ class PerceptronClassifier:
                         # punish wrong class
                         self.weights[predicted][i] -= self.lr * feats[i]
 
-    # ----------------------------------------------------
-    # PREDICT a single example
-    # ----------------------------------------------------
+    # prediicts one sample
     def predict_one(self, feats: List[int]) -> int:
         """
         Compute dot product with each class's weight vector.
@@ -80,7 +73,6 @@ class PerceptronClassifier:
             score = 0.0
             w = self.weights[c]
 
-            # dot-product manually
             for i in range(self.num_features):
                 score += w[i] * feats[i]
 
@@ -90,8 +82,7 @@ class PerceptronClassifier:
 
         return best_class
 
-    # ----------------------------------------------------
-    # PREDICT many
-    # ----------------------------------------------------
+
+    # predict many samples
     def predict(self, X: List[List[int]]) -> List[int]:
         return [self.predict_one(feats) for feats in X]

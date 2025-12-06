@@ -52,9 +52,7 @@ def build_default_paths(data_dir: str, dataset: str):
 
 
 def main():
-    # -------------------------------------------------------
     # Parse command-line arguments
-    # -------------------------------------------------------
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -106,19 +104,16 @@ def main():
 
     random.seed(args.seed)
 
-    print("\n=======================================")
-    print("   CS4346 Project 2 - Image Classifier ")
-    print("=======================================\n")
 
-    print(f"Dataset      : {args.dataset}")
-    print(f"Algorithm    : {args.algorithm}")
-    print(f"Feature type : {args.feature_type}")
-    print(f"Data dir     : {args.data_dir}")
+    print("   CS4346 Project 2 - Image Classifier ")
+
+    print(f"Dataset: {args.dataset}")
+    print(f"Algorithm: {args.algorithm}")
+    print(f"Feature type: {args.feature_type}")
+    print(f"Data dir: {args.data_dir}")
     print()
 
-    # -------------------------------------------------------
     # Load dataset
-    # -------------------------------------------------------
     paths = build_default_paths(args.data_dir, args.dataset)
 
     train_samples, h_tr, w_tr = load_ascii_dataset(
@@ -136,17 +131,15 @@ def main():
         paths["test_labels"]
     )
 
-    # Check all images same size
+    # making sure all image sizes match
     assert (h_tr, w_tr) == (h_val, w_val) == (h_tst, w_tst), "Image sizes mismatch!"
 
     print(f"Train size: {len(train_samples)}")
-    print(f"Val size  : {len(val_samples)}")
-    print(f"Test size : {len(test_samples)}")
+    print(f"Val size: {len(val_samples)}")
+    print(f"Test size: {len(test_samples)}")
     print(f"Image size: {h_tr} x {w_tr}\n")
 
-    # -------------------------------------------------------
-    # Extract features
-    # -------------------------------------------------------
+    # Extracting features
     X_train = extract_features(train_samples, args.feature_type)
     y_train = [s.label for s in train_samples]
 
@@ -156,9 +149,7 @@ def main():
     X_test = extract_features(test_samples, args.feature_type)
     y_test = [s.label for s in test_samples]
 
-    # -------------------------------------------------------
     # Choose classifier
-    # -------------------------------------------------------
     if args.algorithm == "naive_bayes":
         def factory():
             return NaiveBayesClassifier()
@@ -169,9 +160,8 @@ def main():
     # Training percentages
     train_percentages = [0.1 * i for i in range(1, 11)]  # 0.1 → 1.0
 
-    # -------------------------------------------------------
+
     # Run experiments
-    # -------------------------------------------------------
     print("Running experiments...\n")
 
     results = run_subsample_experiments(
@@ -184,9 +174,8 @@ def main():
         num_runs=args.runs
     )
 
-    # -------------------------------------------------------
-    # Print results
-    # -------------------------------------------------------
+
+    # show results
     print("\nResults (on TEST set):")
     print("Train%   MeanAcc   StdAcc    MeanTrainTime(s)")
 
