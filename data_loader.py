@@ -8,7 +8,7 @@ from typing import List, Tuple
 @dataclass
 class Sample:
     """
-    Represents one ASCII image and its label.
+    Represents one ASCII image and its label// training example.
     - pixels: list of strings (each string is one row of the image)
     - label:  int (digit 0–9 or face/not-face indicator)
     """
@@ -30,7 +30,7 @@ def load_ascii_dataset(image_path: str, label_path: str) -> Tuple[List[Sample], 
     # 1. Load labels
     # ----------------------------
     labels: List[int] = []
-    with open(label_path, "r") as f:
+    with open(label_path, "r") as f: 
         for line in f:
             line = line.strip()
             if line != "":
@@ -48,8 +48,7 @@ def load_ascii_dataset(image_path: str, label_path: str) -> Tuple[List[Sample], 
         for line in f:
             image_lines.append(line.rstrip("\n"))   # keep spaces, remove newline only
 
-    # Remove trailing blank lines if present
-    while image_lines and image_lines[-1] == "":
+    while image_lines and image_lines[-1] == "": # Remove trailing blank lines if present
         image_lines.pop()
 
     total_lines = len(image_lines)

@@ -94,7 +94,7 @@ def main():
 
     args = parser.parse_args()
     random.seed(args.seed)
-
+    # nicely structred header
     print("\n=== CS4346 Project 2 - Image Classifier ===\n")
     print(f"Dataset:     {args.dataset}")
     print(f"Algorithm:   {args.algorithm}")
@@ -102,9 +102,12 @@ def main():
 
     # Load dataset
     paths = build_default_paths(args.data_dir, args.dataset)
+    #building dictionary of file paths using data dir and dataset type
 
-    train_samples, h_tr, w_tr = load_ascii_dataset(paths["train_images"], paths["train_labels"])
+    train_samples, h_tr, w_tr = load_ascii_dataset(paths["train_images"], paths["train_labels"]) #returns list of Sample objects and image dimensions
+
     _, h_val, w_val = load_ascii_dataset(paths["val_images"], paths["val_labels"])
+
     test_samples, h_tst, w_tst = load_ascii_dataset(paths["test_images"], paths["test_labels"])
 
     # Ensure consistent image size

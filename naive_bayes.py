@@ -30,7 +30,7 @@ class NaiveBayesClassifier:
         self.num_features = len(X[0])
         self.num_classes = len(set(y))
 
-        # examples per class
+        # counts samples per class
         class_counts = [0] * self.num_classes
 
         # keep track of feature counts per class
